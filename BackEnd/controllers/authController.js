@@ -1,62 +1,85 @@
-const User = require("../models/user")
-const bcrypt = require("bcrypt")
-const jwt = require("jsonwebtoken")
+const User = require("../models/user");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
+// ================= REGISTER =================
 exports.register = async (req, res) => {
     try {
+        const { name, email, password } = req.body || {};
 
-        const { name, email, password } = req.body || {}
-
+        // Validation
         if (!name || !email || !password) {
-            return res.json("All fields required")
+            return res.status(400).json({ message: "All fields are required" });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10)
+        // Check existing user
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "User already exists" });
+        }
 
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Save user
         const user = new User({
             name,
             email,
             password: hashedPassword
-        })
+        });
 
-        await user.save()
+        await user.save();
 
-        res.json("User registered successfully")
+        res.status(201).json({ message: "User registered successfully" });
 
     } catch (err) {
-        console.log(err)
-        res.status(500).json("Server error")
+        console.log(err);
+        res.status(500).json({ message: "Server error" });
     }
-}
+};
 
+
+// ================= LOGIN =================
 exports.login = async (req, res) => {
     try {
+        const { email, password } = req.body || {};
 
-        const { email, password } = req.body;
-
+        // Validation
         if (!email || !password) {
-            return res.json("Email and password required")
+            return res.status(400).json({ message: "Email and password required" });
         }
 
-        const user = await User.findOne({ email })
-
+        // Check user
+        const user = await User.findOne({ email });
         if (!user) {
-            return res.json("User not found")
+            return res.status(404).json({ message: "User not found" });
         }
+
+        // Compare password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.json("Invalid credentials");
+            return res.status(401).json({ message: "Invalid credentials" });
         }
 
-        const token = jwt.sign({ id: user._id }, "secretkey", { expiresIn: "1d" });
+        // Generate token
+        const token = jwt.sign(
+            { id: user._id },
+            process.env.JWT_SECRET || "secretkey",
+            { expiresIn: "1d" }
+        );
 
-        res.json({
+        res.status(200).json({
             message: "Login successful",
-            token
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email
+            }
         });
 
     } catch (err) {
-        console.log(err)
-        res.status(500).json("Server error")
+        console.log(err);
+        res.status(500).json({ message: "Server error" });
     }
-}
+};
