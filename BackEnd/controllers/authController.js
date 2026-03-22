@@ -2,60 +2,61 @@ const User = require("../models/user")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 
-exports.register = async (req,res)=>{
-try{
+exports.register = async (req, res) => {
+    try {
 
-const {name,email,password} = req.body || {}
+        const { name, email, password } = req.body || {}
 
-if(!name || !email || !password){
-return res.json("All fields required")
+        if (!name || !email || !password) {
+            return res.json("All fields required")
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10)
+
+        const user = new User({
+            name,
+            email,
+            password: hashedPassword
+        })
+
+        await user.save()
+
+        res.json("User registered successfully")
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).json("Server error")
+    }
 }
 
-const hashedPassword = await bcrypt.hash(password,10)
+exports.login = async (req, res) => {
+    try {
 
-const user = new User({
-name,
-email,
-password:hashedPassword
-})
+        const { email, password } = req.body;
 
-await user.save()
+        if (!email || !password) {
+            return res.json("Email and password required")
+        }
 
-res.json("User registered successfully")
+        const user = await User.findOne({ email })
 
-}catch(err){
-console.log(err)
-res.status(500).json("Server error")
-}
-}
+        if (!user) {
+            return res.json("User not found")
+        }
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.json("Invalid credentials");
+        }
 
-exports.login = async (req,res)=>{
-try{
+        const token = jwt.sign({ id: user._id }, "secretkey", { expiresIn: "1d" });
 
-const {email,password} = req.body || {}
+        res.json({
+            message: "Login successful",
+            token
+        });
 
-if(!email || !password){
-return res.json("Email and password required")
-}
-
-const user = await User.findOne({email})
-
-if(!user){
-return res.json("User not found")
-}
-
-const validPassword = await bcrypt.compare(password,user.password)
-
-if(!validPassword){
-return res.json("Invalid password")
-}
-
-const token = jwt.sign({id:user._id},process.env.JWT_SECRET)
-
-res.json({token})
-
-}catch(err){
-console.log(err)
-res.status(500).json("Server error")
-}
+    } catch (err) {
+        console.log(err)
+        res.status(500).json("Server error")
+    }
 }
