@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillSwap — Exchange Skills, Grow Together</title>
+<meta name="description" content="SkillSwap is a peer-to-peer skill exchange platform. Teach what you know, learn what you don't.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+<!-- Animated Background -->
+<div class="bg-gradient">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+<div class="bg-grid"></div>
+
+<!-- Floating Skill Pills -->
+<div class="floating-pills">
+  <div class="floating-pill">🎸 Guitar</div>
+  <div class="floating-pill">🐍 Python</div>
+  <div class="floating-pill">🎨 Design</div>
+  <div class="floating-pill">📸 Photography</div>
+  <div class="floating-pill">🧘 Yoga</div>
+  <div class="floating-pill">🗣️ Spanish</div>
+  <div class="floating-pill">🎹 Piano</div>
+  <div class="floating-pill">📊 Data Science</div>
+</div>
+
+<div class="login-container">
+  <div class="brand">
+    <div class="brand-name">SkillSwap</div>
+    <p class="brand-tagline">Teach what you know. Learn what you don't.</p>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+    </div>
+
+    <div id="alertBox" class="alert hidden"></div>
+
+    <!-- LOGIN -->
+    <div id="loginSection" class="form-section active">
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password" />
+      </div>
+      <button class="btn-auth" id="loginBtn" onclick="handleLogin()">
+        <span class="btn-text">Sign In</span>
+        <div class="spinner"></div>
+      </button>
+      <p class="auth-footer">Don't have an account? <a onclick="switchTab('register')">Create one</a></p>
+    </div>
+
+    <!-- REGISTER -->
+    <div id="registerSection" class="form-section">
+      <div class="form-group">
+        <label>Full name</label>
+        <input type="text" id="regName" placeholder="John Doe" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label>Email address</label>
+        <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="regPassword" placeholder="Min 6 characters" autocomplete="new-password" />
+      </div>
+      <button class="btn-auth" id="regBtn" onclick="handleRegister()">
+        <span class="btn-text">Create Account</span>
+        <div class="spinner"></div>
+      </button>
+      <p class="auth-footer">Already have an account? <a onclick="switchTab('login')">Sign in</a></p>
+    </div>
+
+    <div class="trust-badges">
+      <div class="trust-badge">
+        <svg viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
+        Secure Auth
+      </div>
+      <div class="trust-badge">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+        Trust Verified
+      </div>
+      <div class="trust-badge">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+        Geo-Matched
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="login.js"></script>
+
+</body>
+</html>
