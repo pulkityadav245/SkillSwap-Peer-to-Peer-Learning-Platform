@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SkillSwap — Dashboard</title>
+<meta name="description" content="Manage your skills, find matches, and discover nearby skill exchanges.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">SkillSwap</div>
+    <div class="sidebar-logo-sub">Skill Exchange Platform</div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <button class="nav-item active" data-section="my" onclick="switchSection('my')">
+      <span class="icon">📚</span> My Skills
+    </button>
+    <button class="nav-item" data-section="browse" onclick="switchSection('browse')">
+      <span class="icon">🌍</span> Browse All
+    </button>
+    <button class="nav-item" data-section="matches" onclick="switchSection('matches')">
+      <span class="icon">🤝</span> Matches
+    </button>
+    <button class="nav-item" data-section="nearby" onclick="switchSection('nearby')">
+      <span class="icon">📍</span> Nearby Map
+    </button>
+    <button class="nav-item" data-section="video" onclick="switchSection('video')">
+      <span class="icon">📹</span> Video Call
+    </button>
+    <div class="nav-divider"></div>
+    <button class="nav-item" data-section="trust" onclick="switchSection('trust')">
+      <span class="icon">⭐</span> Trust Score
+    </button>
+    <button class="nav-item" data-section="profile" onclick="switchSection('profile')">
+      <span class="icon">👤</span> Profile
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="profile-mini" onclick="switchSection('profile')">
+      <div class="avatar-sm" id="navAvatar">?</div>
+      <div class="profile-info">
+        <div class="profile-name" id="navUserName">Loading…</div>
+        <div class="profile-email" id="navUserEmail"></div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <span class="topbar-title" id="topTitle">My Skills</span>
+    </div>
+    <div class="topbar-actions">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="avatar-sm" id="profileAvatar" style="width:30px;height:30px;font-size:11px;">?</div>
+        <span style="font-size:13px;font-weight:500;color:var(--text-dim);" id="profileName">…</span>
+        <span style="display:none" id="profileEmail"></span>
+      </div>
+      <button class="btn btn-ghost" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ════ MY SKILLS ════ -->
+    <div id="mySection" class="section active">
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title">➕ Add a Skill</div>
+        <div class="form-row">
+          <div class="form-group"><label>I can teach / offer</label><input type="text" id="skillOffered" placeholder="e.g. Python, Guitar, Cooking"></div>
+          <div class="form-group"><label>I want to learn</label><input type="text" id="skillWanted" placeholder="e.g. Graphic Design, Spanish"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Level</label><select id="skillLevel"><option value="beginner">Beginner</option><option value="intermediate" selected>Intermediate</option><option value="advanced">Advanced</option></select></div>
+          <div class="form-group"><label>Description (optional)</label><input type="text" id="skillDesc" placeholder="Short note about what you offer"></div>
+        </div>
+        <button class="btn btn-primary" onclick="addSkill()">Add Skill</button>
+      </div>
+      <div id="mySkillsList" class="skills-grid"><div class="loading-text">Loading your skills…</div></div>
+    </div>
+
+    <!-- ════ BROWSE ALL ════ -->
+    <div id="browseSection" class="section">
+      <div id="allSkillsList" class="skills-grid"><div class="loading-text">Loading skills…</div></div>
+    </div>
+
+    <!-- ════ MATCHES ════ -->
+    <div id="matchesSection" class="section">
+      <div id="matchesList" class="skills-grid"><div class="loading-text">Finding matches…</div></div>
+    </div>
+
+    <!-- ════ NEARBY MAP ════ -->
+    <div id="nearbySection" class="section">
+      <div class="card" style="margin-bottom:20px;">
+        <div class="card-title">📍 Set Your Location</div>
+        <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+          <div class="form-group" style="flex:1;min-width:200px;"><label>Your city / area</label><input type="text" id="locationInput" placeholder="e.g. Dehradun, India"></div>
+          <div class="form-group" style="min-width:110px;"><label>Radius (km)</label><input type="number" id="radiusInput" value="50" min="5" max="500"></div>
+          <button class="btn btn-primary" onclick="setLocation()">Update & Search</button>
+        </div>
+        <p id="locationStatus" style="font-size:12px;color:var(--text-dim);margin-top:10px;"></p>
+      </div>
+      <div class="map-container"><div id="mapElement"></div></div>
+      <div id="nearbyList" class="skills-grid"></div>
+    </div>
+
+    <!-- ════ TRUST SCORE ════ -->
+    <div id="trustSection" class="section">
+      <div class="card" id="trustScoreCard" style="margin-bottom:20px;">
+        <div class="loading-text">Loading trust score…</div>
+      </div>
+      <div class="card">
+        <div class="card-title">⭐ Rate a User</div>
+        <div class="form-row">
+          <div class="form-group"><label>User ID to rate</label><input type="text" id="rateUserId" placeholder="Paste user's MongoDB ID"></div>
+          <div class="form-group"><label>Score (1–5)</label><select id="rateScore"><option value="5">⭐⭐⭐⭐⭐ Excellent</option><option value="4">⭐⭐⭐⭐ Good</option><option value="3" selected>⭐⭐⭐ Average</option><option value="2">⭐⭐ Poor</option><option value="1">⭐ Very Poor</option></select></div>
+        </div>
+        <div class="form-group" style="margin-bottom:14px;"><label>Review (optional)</label><input type="text" id="rateReview" placeholder="Short note about this person…"></div>
+        <button class="btn btn-primary" onclick="submitRating()">Submit Rating</button>
+      </div>
+    </div>
+
+    <!-- ════ VIDEO CALL ════ -->
+    <div id="videoSection" class="section">
+      <div id="videoCallIdle">
+        <div class="card video-welcome-card">
+          <div class="video-welcome-icon">📹</div>
+          <h2 class="video-welcome-title">Video Calling</h2>
+          <p class="video-welcome-desc">Start a face-to-face video call with any SkillSwap user to exchange skills in real time. Use the <strong>📞 Call</strong> button on any skill card or match to begin.</p>
+          <div class="video-features">
+            <div class="video-feature-item">
+              <span class="video-feature-icon">🔒</span>
+              <div><strong>Private Rooms</strong><br><span>Each call gets a unique, secure room</span></div>
+            </div>
+            <div class="video-feature-item">
+              <span class="video-feature-icon">🌐</span>
+              <div><strong>No Downloads</strong><br><span>Works directly in your browser</span></div>
+            </div>
+            <div class="video-feature-item">
+              <span class="video-feature-icon">🎥</span>
+              <div><strong>HD Video & Audio</strong><br><span>Powered by Jitsi Meet</span></div>
+            </div>
+          </div>
+          <div class="video-quick-call">
+            <div class="card-title">⚡ Quick Call by User ID</div>
+            <div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;">
+              <div class="form-group" style="flex:1;min-width:220px;"><label>Paste User ID</label><input type="text" id="quickCallUserId" placeholder="Paste MongoDB user ID"></div>
+              <button class="btn btn-video" onclick="startQuickCall()">📞 Start Call</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Call History -->
+        <div class="card" style="margin-top:20px;">
+          <div class="card-title">📋 Call History</div>
+          <div id="callHistoryList"><div class="loading-text">Loading call history…</div></div>
+        </div>
+      </div>
+      <div id="videoCallActive" style="display:none;">
+        <div class="video-call-header">
+          <div class="video-call-info">
+            <div class="video-call-pulse"></div>
+            <span class="video-call-status">In Call with <strong id="videoCallPartner">—</strong></span>
+            <span id="callTimer" class="call-timer">00:00</span>
+          </div>
+          <button class="btn btn-danger-solid" onclick="endVideoCall()">✕ End Call</button>
+        </div>
+        <div class="video-container">
+          <iframe id="jitsiFrame" allow="camera; microphone; display-capture; autoplay; clipboard-write" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PROFILE ════ -->
+    <div id="profileSection" class="section">
+      <div class="card">
+        <div class="card-title">👤 Edit Profile</div>
+        <div class="form-group" style="margin-bottom:14px;"><label>Full Name</label><input type="text" id="editName" placeholder="Your name"></div>
+        <div class="form-group" style="margin-bottom:14px;"><label>Bio</label><textarea id="editBio" placeholder="Tell people about yourself…"></textarea></div>
+        <div class="form-group" style="margin-bottom:14px;"><label>Location</label><input type="text" id="editLocation" placeholder="e.g. Dehradun, India"></div>
+        <button class="btn btn-primary" onclick="updateProfile()">Save Changes</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- Incoming Call Overlay -->
+<div id="incomingCallOverlay" class="incoming-call-overlay" style="display:none;">
+  <div class="incoming-call-modal">
+    <div class="incoming-call-ring">
+      <div class="ring-circle ring-1"></div>
+      <div class="ring-circle ring-2"></div>
+      <div class="ring-circle ring-3"></div>
+      <div class="incoming-call-avatar" id="incomingCallerAvatar">?</div>
+    </div>
+    <div class="incoming-call-label">Incoming Video Call</div>
+    <div class="incoming-call-name" id="incomingCallerName">Someone</div>
+    <div class="incoming-call-sub">wants to skill swap with you</div>
+    <div class="incoming-call-actions">
+      <button class="call-action-btn call-decline" onclick="declineIncomingCall()">
+        <span>✕</span>
+        Decline
+      </button>
+      <button class="call-action-btn call-accept" onclick="acceptIncomingCall()">
+        <span>📞</span>
+        Accept
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
