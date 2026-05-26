@@ -104,7 +104,7 @@ Open `index.html` from the `FrontEnd` folder in your browser.
 
 ## Project Status
 
-Active Development 🚀
+Active Development 
 
 ---
 
