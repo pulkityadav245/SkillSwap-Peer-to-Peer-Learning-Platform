@@ -3,17 +3,29 @@ const mongoose = require("mongoose");
 const skillSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "User"
+        ref: "User",
+        required: true
     },
     skillOffered: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
     skillWanted: {
         type: String,
-        required: true
+        required: true,
+        trim: true
     },
-    description: String
+    description: {
+        type: String,
+        trim: true,
+        default: ""
+    },
+    level: {
+        type: String,
+        enum: ["beginner", "intermediate", "advanced"],
+        default: "intermediate"
+    }
 }, {
     timestamps: true
 });
