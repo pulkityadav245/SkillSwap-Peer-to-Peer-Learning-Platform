@@ -2,7 +2,6 @@
 
 SkillSwap is a peer-to-peer learning platform where users can connect with others to exchange skills, collaborate, and learn together. The platform helps users find people with complementary skills and build a trusted learning community.
 
----
 
 ## Features
 
@@ -16,7 +15,6 @@ SkillSwap is a peer-to-peer learning platform where users can connect with other
 - Geo-based User Support
 - Responsive Frontend Interface
 
----
 
 ## Tech Stack
 
@@ -32,7 +30,6 @@ SkillSwap is a peer-to-peer learning platform where users can connect with other
 ### Database
 - MongoDB
 
----
 
 ## Project Structure
 
@@ -47,7 +44,6 @@ SkillSwap/
 └── README.md
 ```
 
----
 
 ## Installation & Setup
 
@@ -89,7 +85,7 @@ npm start
 
 Open `index.html` from the `FrontEnd` folder in your browser.
 
----
+
 
 ## Future Improvements
 
@@ -100,13 +96,13 @@ Open `index.html` from the `FrontEnd` folder in your browser.
 - Notifications & Messaging
 - Mobile Responsive Enhancements
 
----
+
 
 ## Project Status
 
 Active Development 
 
----
+
 
 ## Team Project
 
