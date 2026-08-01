@@ -117,4 +117,4 @@ Active Development
 
 ## Team Project
 
-Developed as a collaborative academic project for building a peer-to-peer skill exchange and learning platform .
+Developed as a collaborative academic project for building a peer-to-peer skill exchange and learning platform.
