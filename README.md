@@ -53,7 +53,7 @@ SkillSwap/
 <br>
 <br>
 
-## Installation & Setup
+## Installation & Setup(Use Nodemon For Continous Development)
 
 ### 1. Clone the Repository
 
